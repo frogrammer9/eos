@@ -17,12 +17,15 @@ error_t _eos_push_event(event_t event) {
 }
 
 void _eos_process_events() {
-	while() {
+	while(((event_queue_start_inx + 1) & (EVENT_QUEUE_SIZE - 1)) != event_queue_end_inx) {
 		volatile const event_t* cevent = &event_queue[event_queue_start_inx++];
-		if(event_queue_start_inx >= EVENT_QUEUE_SIZE) event_queue_start_inx -= EVENT_QUEUE_SIZE;
+		event_queue_start_inx &= EVENT_QUEUE_SIZE - 1;
 		switch(cevent->type) {
 			case EVENT_PIN_STATE_CHANGE:
-				(*(void (*)(u8, u8))(event_handlers[cevent->type]))(0, 0);
+				if(event_handlers[cevent->type]) (*(void (*)(pin_t, bool))(event_handlers[cevent->type]))(
+						cevent->pin_state_change_data.pin,
+						cevent->pin_state_change_data.state
+					);
 			break;
 		}
 	}
