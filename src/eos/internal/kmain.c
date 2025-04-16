@@ -1,10 +1,13 @@
 #include "internal/event.h"
+#include "internal/gpio.h"
+#include <avr/interrupt.h>
 
 void init();
 
 void kinit() {
-
+	_eos_gpio_init();
 	init();
+	sei();
 }
 
 int main() {
